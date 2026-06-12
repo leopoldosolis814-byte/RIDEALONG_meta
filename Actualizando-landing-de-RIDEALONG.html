@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIDEALONG — Find Your Van, Anywhere</title>
+<meta name="description" content="RIDEALONG is the premier marketplace for vanlife and adventure vehicles. Buy, sell, and rent vans anywhere.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com" onerror="document.documentElement.classList.add('no-tailwind')"></script>
+<!-- Supabase init here for production -->
+<!-- PayPal SDK init here for production -->
+<style>
+  :root {
+    --orange: #F05A28;
+    --amber: #F5A623;
+    --dark: #0F0F0F;
+    --sand: #FAF6F1;
+    --green: #1A8A5A;
+    --shadow-sm: 0 2px 8px rgba(15, 15, 15, 0.04);
+    --shadow-md: 0 8px 24px rgba(15, 15, 15, 0.08);
+    --shadow-lg: 0 16px 48px rgba(15, 15, 15, 0.12);
+    --shadow-xl: 0 24px 64px rgba(15, 15, 15, 0.16);
+    --glow-orange: 0 8px 32px rgba(240, 90, 40, 0.25);
+    --glass-bg: rgba(250, 246, 241, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+  }
+
+  ::selection {
+    background: var(--orange);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--sand);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--orange), var(--amber));
+    border-radius: 10px;
+    border: 2px solid var(--sand);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--orange);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--sand);
+    color: var(--dark);
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    opacity: 1;
+    display: block;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    letter-spacing: -0.01em;
+  }
+
+  button, a, input, select, textarea {
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  .noise::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  #scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--orange), var(--amber));
+    z-index: 9999;
+    width: 0%;
+    transform-origin: left;
+    will-change: width;
+    transition: width 0.1s linear;
+  }
+
+  .nav-glass {
+    background: rgba(250, 246, 241, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(15, 15, 15, 0.05);
+    box-shadow: var(--shadow-sm);
+    will-change: transform;
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav-hidden {
+    transform: translateY(-100%);
+  }
+
+  .nav-gradient-border {
+    position: relative;
+  }
+
+  .nav-gradient-border::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--orange) 20%, var(--amber) 50%, var(--orange) 80%, transparent);
+    opacity: 0.3;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .hero-bg img {
+    width: 100%;
+    height: 120%;
+    object-fit: cover;
+    object-position: center;
+    transform: translateY(0);
+    will-change: transform;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15,15,15,0.3) 0%, rgba(15,15,15,0.5) 50%, rgba(15,15,15,0.7) 100%);
+    z-index: 1;
+  }
+
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(240, 90, 40, 0.15), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .hero:hover .hero-glow {
+    opacity: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+  }
+
+  .hero h1 {
+    text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    font-size: clamp(2.5rem, 8vw, 6rem);
+  }
+
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent 40%, rgba(240,90,40,0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .van-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, box-shadow;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .van-card:hover {
+    transform: translate3d(0, -8px, 0);
+    box-shadow: var(--shadow-xl), var(--glow-orange);
+  }
+
+  .van-card-image {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16/10;
+  }
+
+  .van-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .van-card:hover .van-card-image img {
+    transform: scale(1.05);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--orange), var(--amber));
+    color: white;
+    font-weight: 600;
+    padding: 14px 32px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(240, 90, 40, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(240, 90, 40, 0.4);
+  }
+
+  .btn-primary:hover::before {
+    opacity: 1;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-magnetic {
+    will-change: transform;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--dark);
+    font-weight: 600;
+    padding: 14px 32px;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 15, 15, 0.1);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-secondary:hover {
+    background: var(--sand);
+    border-color: var(--orange);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  section {
+    opacity: 1;
+    display: block;
+  }
+
+  .section-reveal {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform;
+  }
+
+  .section-reveal.reveal-hidden {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+
+  .section-reveal.visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 12px;
+  }
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skeleton-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .badge-orange {
+    background: rgba(240, 90, 40, 0.1);
+    color: var(--orange);
+    border: 1px solid rgba(240, 90, 40, 0.2);
+  }
+
+  .badge-green {
+    background: rgba(26, 138, 90, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(26, 138, 90, 0.2);
+  }
+
+  input, textarea, select {
+    background: white;
+    border: 1px solid rgba(15, 15, 15, 0.1);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 44px;
+  }
+
+  input:hover, textarea:hover, select:hover {
+    border-color: rgba(240, 90, 40, 0.3);
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(240, 90, 40, 0.1);
+  }
+
+  .modal-overlay {
+    background: rgba(15, 15, 15, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--dark);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    z-index: 9999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      min-height: 90vh;
+    }
+    
+    .hero h1 {
+      font-size: clamp(2rem, 10vw, 3.5rem);
+    }
+
+    .van-card:hover {
+      transform: translate3d(0, -4px, 0);
+    }
+
+    .parallax-mobile-disable {
+      transform: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  .no-tailwind .max-w-7xl { max-width: 80rem; margin: 0 auto; }
+  .no-tailwind .px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .no-tailwind .grid { display: grid; }
+  .no-tailwind .flex { display: flex; }
+  .no-tailwind .hidden { display: none; }
+</style>
+</head>
+<body class="noise">
+  <div id="scroll-progress"></div>
+
+  <nav id="navbar" class="nav-glass nav-gradient-border fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <div class="flex items-center gap-8">
+          <a href="#" class="flex items-center gap-3">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="8" fill="url(#logo-gradient)"/>
+              <path d="M16 8L22 14H19V22H13V14H10L16 8Z" fill="white"/>
+              <defs>
+                <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32">
+                  <stop stop-color="#F05A28"/>
+                  <stop offset="1" stop-color="#F5A623"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="text-2xl font-extrabold" style="font-family: 'Syne', sans-serif;">RIDEALONG</span>
+          </a>
+          <div class="hidden md:flex items-center gap-6">
+            <a href="#browse" class="text-sm font-medium hover:text-[var(--orange)] transition-colors" data-lang="nav.browse">Browse</a>
+            <a href="#sell" class="text-sm font-medium hover:text-[var(--orange)] transition-colors" data-lang="nav.sell">Sell Your Van</a>
+            <a href="#how" class="text-sm font-medium hover:text-[var(--orange)] transition-colors" data-lang="nav.how">How It Works</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="lang-toggle" class="btn-secondary text-sm px-4 py-2" data-lang="nav.lang">EN</button>
+          <button id="login-btn" class="btn-secondary text-sm" data-lang="nav.login">Log In</button>
+          <button id="signup-btn" class="btn-primary btn-magnetic text-sm" data-lang="nav.signup">Sign Up</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <div class="hero-bg parallax-mobile-disable">
+      <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2940" alt="Van in mountains" loading="eager">
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-glow" id="hero-cursor-glow"></div>
+    <div class="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div class="max-w-3xl">
+        <span class="badge badge-orange mb-6" data-lang="hero.badge">#1 VanLife Marketplace</span>
+        <h1 class="text-white mb-6" data-lang="hero.title">Find Your Van,<br>Anywhere.</h1>
+        <p class="text-white/90 text-lg md:text-xl mb-8 max-w-2xl" data-lang="hero.subtitle">The world's most trusted marketplace for adventure vehicles. Buy, sell, and rent vans from verified owners worldwide.</p>
+        <div class="flex flex-wrap gap-4">
+          <button class="btn-primary btn-magnetic" onclick="document.getElementById('browse').scrollIntoView({behavior: 'smooth'})" data-lang="hero.cta1">
+            Browse Vans
+          </button>
+          <button class="btn-secondary" onclick="document.getElementById('sell').scrollIntoView({behavior: 'smooth'})" data-lang="hero.cta2">
+            List Your Van
+          </button>
+        </div>
+        <div class="flex flex-wrap items-center gap-8 mt-12">
+          <div>
+            <div class="text-white text-3xl font-bold">50K+</div>
+            <div class="text-white/70 text-sm" data-lang="hero.stat1">Active Listings</div>
+          </div>
+          <div>
+            <div class="text-white text-3xl font-bold">120+</div>
+            <div class="text-white/70 text-sm" data-lang="hero.stat2">Countries</div>
+          </div>
+          <div>
+            <div class="text-white text-3xl font-bold">4.9★</div>
+            <div class="text-white/70 text-sm" data-lang="hero.stat3">User Rating</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20" id="browse">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card p-6 md:p-8">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-semibold mb-2" data-lang="search.location">Location</label>
+            <input type="text" id="search-location" placeholder="City, State, or Country" class="w-full">
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-semibold mb-2" data-lang="search.type">Van Type</label>
+            <select id="search-type" class="w-full">
+              <option value="">All Types</option>
+              <option value="sprinter">Mercedes Sprinter</option>
+              <option value="transit">Ford Transit</option>
+              <option value="promaster">Ram ProMaster</option>
+              <option value="vw">VW Bus</option>
+            </select>
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-semibold mb-2" data-lang="search.price">Price Range</label>
+            <select id="search-price" class="w-full">
+              <option value="">Any Price</option>
+              <option value="0-25000">$0 - $25,000</option>
+              <option value="25000-50000">$25,000 - $50,000</option>
+              <option value="50000-100000">$50,000 - $100,000</option>
+              <option value="100000+">$100,000+</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button class="btn-primary btn-magnetic w-full md:w-auto" id="search-btn" data-lang="search.button">
+              Search Vans
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20" id="explore">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-4xl md:text-5xl mb-2" data-lang="featured.title">Featured Vans</h2>
+          <p class="text-gray-600" data-lang="featured.subtitle">Hand-picked vehicles ready for your next adventure</p>
+        </div>
+        <a href="#" class="hidden md:block text-[var(--orange)] font-semibold hover:underline" data-lang="featured.viewall">View All →</a>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vans-grid">
+        <div class="skeleton-card">
+          <div class="skeleton" style="aspect-ratio: 16/10;"></div>
+          <div class="p-5">
+            <div class="skeleton h-6 w-3/4 mb-3"></div>
+            <div class="skeleton h-4 w-1/2 mb-4"></div>
+            <div class="skeleton h-8 w-1/3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20 bg-white" id="how">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="badge badge-green mb-4" data-lang="how.badge">Simple Process</span>
+        <h2 class="text-4xl md:text-5xl mb-4" data-lang="how.title">How RIDEALONG Works</h2>
+        <p class="text-gray-600 text-lg" data-lang="how.subtitle">Find your perfect adventure vehicle in three simple steps</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="glass-card p-8 text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--orange)] to-[var(--amber)] flex items-center justify-center text-white text-2xl font-bold">1</div>
+          <h3 class="text-2xl mb-3" data-lang="how.step1.title">Browse & Filter</h3>
+          <p class="text-gray-600" data-lang="how.step1.desc">Search thousands of verified vans by location, type, price, and features that matter to you.</p>
+        </div>
+        <div class="glass-card p-8 text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--orange)] to-[var(--amber)] flex items-center justify-center text-white text-2xl font-bold">2</div>
+          <h3 class="text-2xl mb-3" data-lang="how.step2.title">Connect & Inspect</h3>
+          <p class="text-gray-600" data-lang="how.step2.desc">Message owners directly, schedule viewings, and get full vehicle history reports.</p>
+        </div>
+        <div class="glass-card p-8 text-center">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--orange)] to-[var(--amber)] flex items-center justify-center text-white text-2xl font-bold">3</div>
+          <h3 class="text-2xl mb-3" data-lang="how.step3.title">Buy With Confidence</h3>
+          <p class="text-gray-600" data-lang="how.step3.desc">Secure payments, escrow protection, and post-purchase support for peace of mind.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20" id="sell">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card p-8 md:p-16 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/2 h-full opacity-10">
+          <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?q=80&w=2940" alt="" class="w-full h-full object-cover" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22%3E%3Crect fill=%22%23F05A28%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2224%22%3EVan Image%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="relative z-10 max-w-2xl">
+          <h2 class="text-4xl md:text-5xl mb-4" data-lang="sell.title">Ready to Sell Your Van?</h2>
+          <p class="text-gray-700 text-lg mb-8" data-lang="sell.subtitle">Join thousands of verified sellers. List your van in minutes and reach buyers worldwide.</p>
+          <div class="flex flex-wrap gap-4 mb-8">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-[var(--green)]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span class="text-sm font-medium" data-lang="sell.feature1">Free to List</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-[var(--green)]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span class="text-sm font-medium" data-lang="sell.feature2">Verified Buyers</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-[var(--green)]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span class="text-sm font-medium" data-lang="sell.feature3">Secure Payments</span>
+            </div>
+          </div>
+          <button class="btn-primary btn-magnetic" id="list-van-btn" data-lang="sell.cta">List Your Van Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20 bg-white" id="pricing">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="badge badge-orange mb-4" data-lang="testimonials.badge">Testimonials</span>
+        <h2 class="text-4xl md:text-5xl mb-4" data-lang="testimonials.title">Loved by VanLifers</h2>
+        <p class="text-gray-600 text-lg" data-lang="testimonials.subtitle">See what our community has to say</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p class="text-gray-700 mb-6" data-lang="testimonials.1.text">"Found my dream Sprinter in 2 weeks. The seller was verified and the whole process was seamless. Already 10,000 miles into my adventure!"</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/48?img=1" alt="" class="w-12 h-12 rounded-full" loading="lazy">
+            <div>
+              <div class="font-semibold" data-lang="testimonials.1.name">Sarah Chen</div>
+              <div class="text-sm text-gray-500" data-lang="testimonials.1.role">Full-time VanLifer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p class="text-gray-700 mb-6" data-lang="testimonials.2.text">"Sold my van in 5 days for asking price. RIDEALONG's escrow gave both me and the buyer total peace of mind. Highly recommend!"</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/48?img=12" alt="" class="w-12 h-12 rounded-full" loading="lazy">
+            <div>
+              <div class="font-semibold" data-lang="testimonials.2.name">Marcus Johnson</div>
+              <div class="text-sm text-gray-500" data-lang="testimonials.2.role">Weekend Warrior</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-8">
+          <div class="flex items-center gap-1 mb-4">
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <svg class="w-5 h-5 text-[var(--amber)]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          </div>
+          <p class="text-gray-700 mb-6" data-lang="testimonials.3.text">"Best marketplace for vanlife. Found three vans to compare, booked viewings, and drove home with my perfect Transit. The app is beautiful too."</p>
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/48?img=5" alt="" class="w-12 h-12 rounded-full" loading="lazy">
+            <div>
+              <div class="font-semibold" data-lang="testimonials.3.name">Emma Rodriguez</div>
+              <div class="text-sm text-gray-500" data-lang="testimonials.3.role">Digital Nomad</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-reveal py-12 md:py-20" id="hosts">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card p-8 md:p-12 text-center">
+        <h2 class="text-3xl md:text-4xl mb-3" data-lang="newsletter.title">Get Van Deals Weekly</h2>
+        <p class="text-gray-600 mb-8" data-lang="newsletter.subtitle">Join 50,000+ vanlifers getting the best deals and adventure tips</p>
+        <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <input type="email" id="newsletter-email" placeholder="Enter your email" required class="flex-1">
+          <button type="submit" class="btn-primary btn-magnetic" data-lang="newsletter.cta">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-[var(--dark)] text-white py-12 md:py-16" id="support">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div>
+          <h4 class="font-semibold mb-4" data-lang="footer.product">Product</h4>
+          <ul class="space-y-3 text-sm text-white/70">
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.browse">Browse Vans</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.sell">Sell Your Van</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.rent">Rent a Van</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.app">Mobile App</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4" data-lang="footer.company">Company</h4>
+          <ul class="space-y-3 text-sm text-white/70">
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.about">About Us</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.careers">Careers</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.press">Press</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.blog">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4" data-lang="footer.support">Support</h4>
+          <ul class="space-y-3 text-sm text-white/70">
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.help">Help Center</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.safety">Safety</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.contact">Contact</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.community">Community</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4" data-lang="footer.legal">Legal</h4>
+          <ul class="space-y-3 text-sm text-white/70">
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.terms">Terms</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.privacy">Privacy</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.cookies">Cookies</a></li>
+            <li><a href="#" class="hover:text-[var(--orange)]" data-lang="footer.licenses">Licenses</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="url(#logo-gradient-footer)"/>
+            <path d="M16 8L22 14H19V22H13V14H10L16 8Z" fill="white"/>
+            <defs>
+              <linearGradient id="logo-gradient-footer" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#F05A28"/>
+                <stop offset="1" stop-color="#F5A623"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="text-xl font-extrabold" style="font-family: 'Syne', sans-serif;">RIDEALONG</span>
+        </div>
+        <p class="text-sm text-white/50" data-lang="footer.copyright">© 2024 RIDEALONG. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="login-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+    <div class="glass-card p-8 w-full max-w-md">
+      <h3 class="text-2xl mb-6" data-lang="modal.login.title">Welcome Back</h3>
+      <form id="login-form">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.login.email">Email</label>
+          <input type="email" id="login-email" required class="w-full">
+        </div>
+        <div class="mb-6">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.login.password">Password</label>
+          <input type="password" id="login-password" required class="w-full">
+        </div>
+        <button type="submit" class="btn-primary btn-magnetic w-full mb-4" data-lang="modal.login.submit">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="signup-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+    <div class="glass-card p-8 w-full max-w-md">
+      <h3 class="text-2xl mb-6" data-lang="modal.signup.title">Join RIDEALONG</h3>
+      <form id="signup-form">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.signup.name">Full Name</label>
+          <input type="text" id="signup-name" required class="w-full">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.signup.email">Email</label>
+          <input type="email" id="signup-email" required class="w-full">
+        </div>
+        <div class="mb-6">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.signup.password">Password</label>
+          <input type="password" id="signup-password" required class="w-full">
+        </div>
+        <button type="submit" class="btn-primary btn-magnetic w-full mb-4" data-lang="modal.signup.submit">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="list-van-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 modal-overlay">
+    <div class="glass-card p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <h3 class="text-2xl mb-6" data-lang="modal.list.title">List Your Van</h3>
+      <form id="list-van-form">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold mb-2" data-lang="modal.list.title_field">Title</label>
+            <input type="text" id="van-title" required class="w-full">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2" data-lang="modal.list.price">Price (USD)</label>
+            <input type="number" id="van-price" required class="w-full">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold mb-2" data-lang="modal.list.make">Make & Model</label>
+            <input type="text" id="van-make" required class="w-full">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2" data-lang="modal.list.year">Year</label>
+            <input type="number" id="van-year" required class="w-full">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.list.location">Location</label>
+          <input type="text" id="van-location" required class="w-full">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.list.description">Description</label>
+          <textarea id="van-description" rows="4" required class="w-full"></textarea>
+        </div>
+        <div class="mb-6">
+          <label class="block text-sm font-semibold mb-2" data-lang="modal.list.photos">Photos</label>
+          <input type="file" id="van-photos" multiple accept="image/*" class="w-full">
+        </div>
+        <button type="submit" class="btn-primary btn-magnetic w-full mb-4" data-lang="modal.list.submit">List Van</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+  // Toast system for offline demo
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Backend hooks preserved as offline stubs - ready to reconnect
+  const supabase = null; // Supabase init here for production
+  
+  function handleSignup(email, password, name) {
+    showToast('Función lista para conectar');
+    console.log('handleSignup called:', { email, name });
+  }
+
+  function handleLogin(email, password) {
+    showToast('Función lista para conectar');
+    console.log('handleLogin called:', { email });
+  }
+
+  function handleListVan(formData) {
+    showToast('Función lista para conectar');
+    console.log('handleListVan called:', formData);
+  }
+
+  function openPayment(vanId, amount) {
+    showToast('Función lista para conectar');
+    console.log('openPayment called:', { vanId, amount });
+  }
+
+  function handleSearch(filters) {
+    showToast('Función lista para conectar');
+    console.log('handleSearch called:', filters);
+    loadVans(filters);
+  }
+
+  // Language toggle
+  const translations = {
+    en: {
+      'nav.browse': 'Browse', 'nav.sell': 'Sell Your Van', 'nav.how': 'How It Works', 'nav.lang': 'EN', 'nav.login': 'Log In', 'nav.signup': 'Sign Up',
+      'hero.badge': '#1 VanLife Marketplace', 'hero.title': 'Find Your Van,<br>Anywhere.', 'hero.subtitle': "The world's most trusted marketplace for adventure vehicles. Buy, sell, and rent vans from verified owners worldwide.",
+      'hero.cta1': 'Browse Vans', 'hero.cta2': 'List Your Van', 'hero.stat1': 'Active Listings', 'hero.stat2': 'Countries', 'hero.stat3': 'User Rating',
+      'search.location': 'Location', 'search.type': 'Van Type', 'search.price': 'Price Range', 'search.button': 'Search Vans',
+      'featured.title': 'Featured Vans', 'featured.subtitle': 'Hand-picked vehicles ready for your next adventure', 'featured.viewall': 'View All →',
+      'how.badge': 'Simple Process', 'how.title': 'How RIDEALONG Works', 'how.subtitle': 'Find your perfect adventure vehicle in three simple steps',
+      'how.step1.title': 'Browse & Filter', 'how.step1.desc': 'Search thousands of verified vans by location, type, price, and features that matter to you.',
+      'how.step2.title': 'Connect & Inspect', 'how.step2.desc': 'Message owners directly, schedule viewings, and get full vehicle history reports.',
+      'how.step3.title': 'Buy With Confidence', 'how.step3.desc': 'Secure payments, escrow protection, and post-purchase support for peace of mind.',
+      'sell.title': 'Ready to Sell Your Van?', 'sell.subtitle': 'Join thousands of verified sellers. List your van in minutes and reach buyers worldwide.',
+      'sell.feature1': 'Free to List', 'sell.feature2': 'Verified Buyers', 'sell.feature3': 'Secure Payments', 'sell.cta': 'List Your Van Now',
+      'testimonials.badge': 'Testimonials', 'testimonials.title': 'Loved by VanLifers', 'testimonials.subtitle': 'See what our community has to say',
+      'testimonials.1.text': '"Found my dream Sprinter in 2 weeks. The seller was verified and the whole process was seamless. Already 10,000 miles into my adventure!"',
+      'testimonials.1.name': 'Sarah Chen', 'testimonials.1.role': 'Full-time VanLifer',
+      'testimonials.2.text': '"Sold my van in 5 days for asking price. RIDEALONG\'s escrow gave both me and the buyer total peace of mind. Highly recommend!"',
+      'testimonials.2.name': 'Marcus Johnson', 'testimonials.2.role': 'Weekend Warrior',
+      'testimonials.3.text': '"Best marketplace for vanlife. Found three vans to compare, booked viewings, and drove home with my perfect Transit. The app is beautiful too."',
+      'testimonials.3.name': 'Emma Rodriguez', 'testimonials.3.role': 'Digital Nomad',
+      'newsletter.title': 'Get Van Deals Weekly', 'newsletter.subtitle': 'Join 50,000+ vanlifers getting the best deals and adventure tips', 'newsletter.cta': 'Subscribe',
+      'footer.product': 'Product', 'footer.browse': 'Browse Vans', 'footer.sell': 'Sell Your Van', 'footer.rent': 'Rent a Van', 'footer.app': 'Mobile App',
+      'footer.company': 'Company', 'footer.about': 'About Us', 'footer.careers': 'Careers', 'footer.press': 'Press', 'footer.blog': 'Blog',
+      'footer.support': 'Support', 'footer.help': 'Help Center', 'footer.safety': 'Safety', 'footer.contact': 'Contact', 'footer.community': 'Community',
+      'footer.legal': 'Legal', 'footer.terms': 'Terms', 'footer.privacy': 'Privacy', 'footer.cookies': 'Cookies', 'footer.licenses': 'Licenses',
+      'footer.copyright': '© 2024 RIDEALONG. All rights reserved.',
+      'modal.login.title': 'Welcome Back', 'modal.login.email': 'Email', 'modal.login.password': 'Password', 'modal.login.submit': 'Log In',
+      'modal.signup.title': 'Join RIDEALONG', 'modal.signup.name': 'Full Name', 'modal.signup.email': 'Email', 'modal.signup.password': 'Password', 'modal.signup.submit': 'Create Account',
+      'modal.list.title': 'List Your Van', 'modal.list.title_field': 'Title', 'modal.list.price': 'Price (USD)', 'modal.list.make': 'Make & Model',
+      'modal.list.year': 'Year', 'modal.list.location': 'Location', 'modal.list.description': 'Description', 'modal.list.photos': 'Photos', 'modal.list.submit': 'List Van'
+    },
+    es: {
+      'nav.browse': 'Explorar', 'nav.sell': 'Vende Tu Van', 'nav.how': 'Cómo Funciona', 'nav.lang': 'ES', 'nav.login': 'Iniciar Sesión', 'nav.signup': 'Registrarse',
+      'hero.badge': '#1 Marketplace VanLife', 'hero.title': 'Encuentra Tu Van,<br>En Cualquier Lugar.', 'hero.subtitle': 'El marketplace más confiable del mundo para vehículos de aventura. Compra, vende y alquila vans de propietarios verificados.',
+      'hero.cta1': 'Explorar Vans', 'hero.cta2': 'Publica Tu Van', 'hero.stat1': 'Anuncios Activos', 'hero.stat2': 'Países', 'hero.stat3': 'Calificación',
+      'search.location': 'Ubicación', 'search.type': 'Tipo de Van', 'search.price': 'Rango de Precio', 'search.button': 'Buscar Vans',
+      'featured.title': 'Vans Destacadas', 'featured.subtitle': 'Vehículos seleccionados listos para tu próxima aventura', 'featured.viewall': 'Ver Todo →',
+      'how.badge': 'Proceso Simple', 'how.title': 'Cómo Funciona RIDEALONG', 'how.subtitle': 'Encuentra tu vehículo de aventura perfecto en tres simples pasos',
+      'how.step1.title': 'Explora y Filtra', 'how.step1.desc': 'Busca miles de vans verificadas por ubicación, tipo, precio y características.',
+      'how.step2.title': 'Conecta e Inspecciona', 'how.step2.desc': 'Mensajea propietarios, agenda visitas y obtén reportes completos del vehículo.',
+      'how.step3.title': 'Compra Seguro', 'how.step3.desc': 'Pagos seguros, protección de depósito y soporte post-compra.',
+      'sell.title': '¿Listo para Vender Tu Van?', 'sell.subtitle': 'Únete a miles de vendedores verificados. Publica tu van en minutos.',
+      'sell.feature1': 'Publicación Gratis', 'sell.feature2': 'Compradores Verificados', 'sell.feature3': 'Pagos Seguros', 'sell.cta': 'Publica Tu Van Ahora',
+      'testimonials.badge': 'Testimonios', 'testimonials.title': 'Amado por VanLifers', 'testimonials.subtitle': 'Mira lo que dice nuestra comunidad',
+      'testimonials.1.text': '"Encontré mi Sprinter soñada en 2 semanas. El vendedor estaba verificado y todo fue perfecto. ¡Ya llevo 10,000 millas!"',
+      'testimonials.1.name': 'Sarah Chen', 'testimonials.1.role': 'VanLifer Tiempo Completo',
+      'testimonials.2.text': '"Vendí mi van en 5 días al precio pedido. El escrow de RIDEALONG nos dio total tranquilidad."',
+      'testimonials.2.name': 'Marcus Johnson', 'testimonials.2.role': 'Aventurero Fin de Semana',
+      'testimonials.3.text': '"Mejor marketplace para vanlife. Comparé tres vans, agendé visitas y me llevé mi Transit perfecta."',
+      'testimonials.3.name': 'Emma Rodriguez', 'testimonials.3.role': 'Nómada Digital',
+      'newsletter.title': 'Recibe Ofertas de Vans', 'newsletter.subtitle': 'Únete a 50,000+ vanlifers recibiendo las mejores ofertas', 'newsletter.cta': 'Suscribirse',
+      'footer.product': 'Producto', 'footer.browse': 'Explorar Vans', 'footer.sell': 'Vende Tu Van', 'footer.rent': 'Alquila una Van', 'footer.app': 'App Móvil',
+      'footer.company': 'Compañía', 'footer.about': 'Nosotros', 'footer.careers': 'Carreras', 'footer.press': 'Prensa', 'footer.blog': 'Blog',
+      'footer.support': 'Soporte', 'footer.help': 'Centro de Ayuda', 'footer.safety': 'Seguridad', 'footer.contact': 'Contacto', 'footer.community': 'Comunidad',
+      'footer.legal': 'Legal', 'footer.terms': 'Términos', 'footer.privacy': 'Privacidad', 'footer.cookies': 'Cookies', 'footer.licenses': 'Licencias',
+      'footer.copyright': '© 2024 RIDEALONG. Todos los derechos reservados.',
+      'modal.login.title': 'Bienvenido de Nuevo', 'modal.login.email': 'Correo', 'modal.login.password': 'Contraseña', 'modal.login.submit': 'Iniciar Sesión',
+      'modal.signup.title': 'Únete a RIDEALONG', 'modal.signup.name': 'Nombre Completo', 'modal.signup.email': 'Correo', 'modal.signup.password': 'Contraseña', 'modal.signup.submit': 'Crear Cuenta',
+      'modal.list.title': 'Publica Tu Van', 'modal.list.title_field': 'Título', 'modal.list.price': 'Precio (USD)', 'modal.list.make': 'Marca y Modelo',
+      'modal.list.year': 'Año', 'modal.list.location': 'Ubicación', 'modal.list.description': 'Descripción', 'modal.list.photos': 'Fotos', 'modal.list.submit': 'Publicar Van'
+    }
+  };
+
+  let currentLang = 'en';
+
+  function updateLanguage() {
+    document.querySelectorAll('[data-lang]').forEach(el => {
+      const key = el.getAttribute('data-lang');
+      if (translations[currentLang][key]) {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+          el.placeholder = translations[currentLang][key];
+        } else {
+          el.innerHTML = translations[currentLang][key];
+        }
+      }
+    });
+    document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
+  }
+
+  document.getElementById('lang-toggle').addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'es' : 'en';
+    updateLanguage();
+  });
+
+  // Scroll Progress Bar
+  const scrollProgress = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    scrollProgress.style.width = progress + '%';
+  }, { passive: true });
+
+  // Sticky Nav Hide/Show on Scroll
+  let lastScroll = 0;
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      navbar.classList.add('nav-hidden');
+    } else {
+      navbar.classList.remove('nav-hidden');
+    }
+    lastScroll = currentScroll;
+  }, { passive: true });
+
+  // Hero Parallax
+  const heroBg = document.querySelector('.hero-bg img');
+  const isMobile = window.innerWidth < 768;
+  if (!isMobile) {
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const parallaxSpeed = 0.5;
+      heroBg.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
+    }, { passive: true });
+  }
+
+  // Hero Cursor Glow Effect
+  const hero = document.getElementById('hero');
+  const heroGlow = document.getElementById('hero-cursor-glow');
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    heroGlow.style.setProperty('--x', x + '%');
+    heroGlow.style.setProperty('--y', y + '%');
+  });
+
+  // Magnetic Buttons
+  document.querySelectorAll('.btn-magnetic').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px) scale(1.02)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'translate(0, 0) scale(1)';
+    });
+  });
+
+  // Scroll Reveal - all sections visible by default, enhance if IO supported
+  const revealSupported = 'IntersectionObserver' in window;
+  const sections = document.querySelectorAll('.section-reveal');
+
+  if (revealSupported) {
+    sections.forEach(section => section.classList.add('reveal-hidden'));
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          entry.target.classList.remove('reveal-hidden');
+          sectionObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    sections.forEach(section => sectionObserver.observe(section));
+  }
+
+  // Modal Logic
+  const modals = {
+    login: document.getElementById('login-modal'),
+    signup: document.getElementById('signup-modal'),
+    listVan: document.getElementById('list-van-modal')
+  };
+
+  function openModal(modalName) {
+    Object.values(modals).forEach(m => m.classList.add('hidden'));
+    modals[modalName].classList.remove('hidden');
+    modals[modalName].classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalName) {
+    modals[modalName].classList.add('hidden');
+    modals[modalName].classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('login-btn').addEventListener('click', () => openModal('login'));
+  document.getElementById('signup-btn').addEventListener('click', () => openModal('signup'));
+  document.getElementById('list-van-btn').addEventListener('click', () => openModal('listVan'));
+
+  Object.values(modals).forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Form Submissions - offline stubs
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    handleLogin(email, password);
+    closeModal('login');
+  });
+
+  document.getElementById('signup-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    handleSignup(email, password, name);
+    closeModal('signup');
+  });
+
+  document.getElementById('list-van-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = {
+      title: document.getElementById('van-title').value,
+      price: parseFloat(document.getElementById('van-price').value),
+      make_model: document.getElementById('van-make').value,
+      year: parseInt(document.getElementById('van-year').value),
+      location: document.getElementById('van-location').value,
+      description: document.getElementById('van-description').value
+    };
+    handleListVan(formData);
+    closeModal('listVan');
+  });
+
+  document.getElementById('newsletter-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Función lista para conectar');
+    document.getElementById('newsletter-email').value = '';
+  });
+
+  document.getElementById('search-btn').addEventListener('click', () => {
+    const location = document.getElementById('search-location').value;
+    const type = document.getElementById('search-type').value;
+    const price = document.getElementById('search-price').value;
+    handleSearch({ location, type, price });
+  });
+
+  // Load Vans - offline demo data
+  function loadVans(filters = {}) {
+    const vansGrid = document.getElementById('vans-grid');
+    vansGrid.innerHTML = `
+      <div class="skeleton-card"><div class="skeleton" style="aspect-ratio: 16/10;"></div><div class="p-5"><div class="skeleton h-6 w-3/4 mb-3"></div><div class="skeleton h-4 w-1/2 mb-4"></div><div class="skeleton h-8 w-1/3"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton" style="aspect-ratio: 16/10;"></div><div class="p-5"><div class="skeleton h-6 w-3/4 mb-3"></div><div class="skeleton h-4 w-1/2 mb-4"></div><div class="skeleton h-8 w-1/3"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton" style="aspect-ratio: 16/10;"></div><div class="p-5"><div class="skeleton h-6 w-3/4 mb-3"></div><div class="skeleton h-4 w-1/2 mb-4"></div><div class="skeleton h-8 w-1/3"></div></div></div>
+    `;
+    setTimeout(() => renderVans(getDemoVans()), 500);
+  }
+
+  function getDemoVans() {
+    return [
+      { id: 1, title: '2022 Mercedes Sprinter 4x4', price: 89500, make_model: 'Mercedes Sprinter', year: 2022, location: 'Denver, CO', image: 'https://images.unsplash.com/photo-1542744173-05336fcc7ad4?q=80&w=2940' },
+      { id: 2, title: '2021 Ford Transit High Roof', price: 64900, make_model: 'Ford Transit', year: 2021, location: 'Portland, OR', image: 'https://images.unsplash.com/photo-1617874184918-23c2dbf25f8d?q=80&w=2940' },
+      { id: 3, title: '2020 Ram ProMaster Build', price: 72000, make_model: 'Ram ProMaster', year: 2020, location: 'Austin, TX', image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2940' },
+      { id: 4, title: '2019 VW California Beach', price: 58000, make_model: 'VW Bus', year: 2019, location: 'San Diego, CA', image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=2940' },
+      { id: 5, title: '2023 Sprinter Luxury Build', price: 125000, make_model: 'Mercedes Sprinter', year: 2023, location: 'Seattle, WA', image: 'https://images.unsplash.com/photo-1590479773265-7464e5d48118?q=80&w=2940' },
+      { id: 6, title: '2021 Transit AWD Adventure', price: 78500, make_model: 'Ford Transit', year: 2021, location: 'Boulder, CO', image: 'https://images.unsplash.com/photo-1620531973622-9243f38395a0?q=80&w=2940' }
+    ];
+  }
+
+  function renderVans(vans) {
+    const vansGrid = document.getElementById('vans-grid');
+    vansGrid.innerHTML = vans.map(van => `
+      <div class="van-card">
+        <div class="van-card-image">
+          <img src="${van.image}" alt="${van.title}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 250%22%3E%3Crect fill=%22%23f3f4f6%22 width=%22400%22 height=%22250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2216%22%3EVan Image%3C/text%3E%3C/svg%3E'">
+          <div class="absolute top-4 left-4">
+            <span class="badge badge-green">Verified</span>
+          </div>
+        </div>
+        <div class="p-5">
+          <h3 class="text-xl mb-2 line-clamp-1">${van.title}</h3>
+          <p class="text-gray-600 text-sm mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            ${van.location}
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="text-2xl font-bold" style="font-family: 'Syne', sans-serif;">$${van.price.toLocaleString()}</div>
+            <button class="text-[var(--orange)] font-semibold text-sm hover:underline" onclick="openPayment(${van.id}, ${van.price})">View Details →</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Initialize
+  updateLanguage();
+  loadVans();
+
+  // Lazy load images optimization
+  if ('loading' in HTMLImageElement.prototype) {
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => img.loading = 'lazy');
+  }
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
